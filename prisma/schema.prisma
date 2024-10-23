@@ -1,0 +1,38 @@
+generator client {
+  provider = "prisma-client-js"
+  previewFeatures = ["omitApi"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Category {
+  id        Int       @id @default(autoincrement())
+  name      String    @unique @db.VarChar(60) // max length 60
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+  products  Product[]
+
+  @@map("categories")
+}
+
+model Product {
+  id          Int      @id @default(autoincrement())
+  name        String   @db.VarChar(120)
+  //@db.Text tells the database to use the TEXT data type, which allows for storing large amounts of text, beyond typical varchar limits.
+  description String?  @db.Text
+  //Decimal(10, 2) means the value can have up to 10 digits in total, with 2 digits after the decimal point (e.g., 99999999.99).
+  price       Decimal  @db.Decimal(10, 2)
+  //@db.VarChar(3) limits the string to a maximum length of 3 characters, perfect for currency codes like "USD", "EUR", etc.
+  currency    String   @default("USD") @db.VarChar(3)
+  quantity    Int      @default(0)
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  categoryId  Int      @map("category_id")
+  category    Category @relation(fields: [categoryId], references: [id])
+
+  @@map("products")
+}
